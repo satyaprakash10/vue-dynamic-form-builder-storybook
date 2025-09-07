@@ -49,6 +49,6 @@ export const ErrorState: Story = {
       );
       return { args, value, error };
     },
-    template: `<BaseTextField  :title="ErrorState" v-bind="args" v-model="value" :error="error" />`,
+    template: `<BaseTextField v-bind="args" v-model="value" :error="error" />`,
   }),
 };

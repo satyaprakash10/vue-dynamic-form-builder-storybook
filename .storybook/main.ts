@@ -12,6 +12,14 @@ const config: StorybookConfig = {
       builder: { viteConfigPath: ".storybook/vite.config.ts" },
     },
   },
+  staticDirs: [],
+  managerHead: (head) => head,
+  docs: {},
+  // Configure Storybook output to work under /storybook
+  viteFinal: async (config, { configType }) => {
+    config.base = "/storybook/";
+    return config;
+  },
 };
 
 export default config;

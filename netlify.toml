@@ -1,0 +1,20 @@
+[build]
+  command = "npm run build:unified"
+  publish = "dist"
+
+# Route Storybook under /storybook
+[[redirects]]
+  from = "/storybook"
+  to = "/storybook/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/storybook/*"
+  to = "/storybook/index.html"
+  status = 200
+
+# SPA fallback for main app (Vite)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200 

@@ -5,3 +5,11 @@ declare module "vuejs3-datepicker" {
   const component: DefineComponent<any, any, any>;
   export default component;
 }
+
+declare interface ImportMetaEnv {
+  readonly VITE_STORYBOOK_URL?: string;
+}
+
+declare interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

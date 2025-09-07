@@ -6,8 +6,8 @@ const props = defineProps<{
   modelValue: string | null;
   label?: string;
   placeholder?: string;
-  minDate?: Date;
-  maxDate?: Date;
+  minDate?: Date | string | number;
+  maxDate?: Date | string | number;
   futureOnly?: boolean;
   clearable?: boolean;
 }>();
@@ -29,6 +29,20 @@ function formatLocalYYYYMMDD(d?: Date | null): string | null {
   const da = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${da}`;
 }
+function coerceToDate(input?: Date | string | number): Date | undefined {
+  if (input == null) return undefined;
+  if (input instanceof Date && !isNaN(input.getTime()))
+    return floorStartOfDay(input);
+  if (typeof input === "number") {
+    const d = new Date(input);
+    return isNaN(d.getTime()) ? undefined : floorStartOfDay(d);
+  }
+  if (typeof input === "string") {
+    const parsed = parseLocalYYYYMMDD(input) || new Date(input);
+    return isNaN(parsed.getTime()) ? undefined : floorStartOfDay(parsed);
+  }
+  return undefined;
+}
 
 const internalDate = ref<Date | null>(null);
 const lastValidDate = ref<Date | null>(null);
@@ -47,18 +61,17 @@ const disabledDates = computed(() => {
     );
   }
 
-  if (props.minDate) {
-    cfg.to = new Date(
-      props.minDate.getFullYear(),
-      props.minDate.getMonth(),
-      props.minDate.getDate() - 1
-    );
+  const minD = coerceToDate(props.minDate);
+  const maxD = coerceToDate(props.maxDate);
+
+  if (minD) {
+    cfg.to = new Date(minD.getFullYear(), minD.getMonth(), minD.getDate() - 1);
   }
-  if (props.maxDate) {
+  if (maxD) {
     cfg.from = new Date(
-      props.maxDate.getFullYear(),
-      props.maxDate.getMonth(),
-      props.maxDate.getDate() + 1
+      maxD.getFullYear(),
+      maxD.getMonth(),
+      maxD.getDate() + 1
     );
   }
 
@@ -71,19 +84,22 @@ function validateDate(d: Date | null): boolean {
   const val = floorStartOfDay(d);
   const today = floorStartOfDay(new Date());
 
+  const minD = coerceToDate(props.minDate);
+  const maxD = coerceToDate(props.maxDate);
+
   if (props.futureOnly && val < today) {
     error.value = "Please select today or a future date";
     return false;
   }
-  if (props.minDate) {
-    const minLocal = floorStartOfDay(props.minDate);
+  if (minD) {
+    const minLocal = floorStartOfDay(minD);
     if (val < minLocal) {
       error.value = `Please select on or after ${minLocal.toLocaleDateString()}`;
       return false;
     }
   }
-  if (props.maxDate) {
-    const maxLocal = floorStartOfDay(props.maxDate);
+  if (maxD) {
+    const maxLocal = floorStartOfDay(maxD);
     if (val > maxLocal) {
       error.value = `Please select on or before ${maxLocal.toLocaleDateString()}`;
       return false;
@@ -178,26 +194,6 @@ function clearSelection() {
             'aria-describedby': error ? 'date-error' : undefined,
           }"
         />
-        <button
-          v-if="clearable !== false && internalDate"
-          type="button"
-          class="inline-flex items-center justify-center w-6 h-6 rounded-md text-slate-500 hover:bg-gray-100 hover:text-slate-700"
-          @click="clearSelection"
-          aria-label="Clear date"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            class="w-4 h-4"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10 8.586l4.95-4.95a1 1 0 111.414 1.415L11.414 10l4.95 4.95a1 1 0 01-1.414 1.415L10 11.414l-4.95 4.95a1 1 0 01-1.414-1.415L8.586 10l-4.95-4.95A1 1 0 115.05 3.636L10 8.586z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </button>
       </div>
     </div>
     <p v-if="error" id="date-error" class="mt-1 text-sm text-red-500">
@@ -207,29 +203,29 @@ function clearSelection() {
 </template>
 
 <style scoped>
-::v-deep(.vuejs3-datepicker__value) {
+:deep(.vuejs3-datepicker__value) {
   border: none;
   padding: 0;
   background: transparent;
 }
-::v-deep(.vuejs3-datepicker__icon) {
+:deep(.vuejs3-datepicker__icon) {
   display: none !important;
 }
-::v-deep(.vuejs3-datepicker__inputvalue) {
+:deep(.vuejs3-datepicker__inputvalue) {
   border: none !important;
   padding: 0 !important;
   background: transparent !important;
   min-width: 0;
 }
-::v-deep(.vuejs3-datepicker__typeablecalendar) {
+:deep(.vuejs3-datepicker__typeablecalendar) {
   display: none;
 }
-::v-deep(.vuejs3-datepicker__calendar) {
+:deep(.vuejs3-datepicker__calendar) {
   background-color: #fff;
   border-radius: 40px;
 }
 
-::v-deep(.vuejs3-datepicker__clear-button) {
+:deep(.vuejs3-datepicker__clear-button) {
   cursor: pointer;
   font-style: normal;
   position: absolute;

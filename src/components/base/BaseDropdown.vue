@@ -27,6 +27,13 @@ function selectOption(option: { label: string; value: string }) {
 
 <template>
   <div class="relative w-full dropdown-wrapper">
+    <label
+      v-if="props.label"
+      class="block mb-1 text-sm font-medium text-gray-700"
+    >
+      {{ props.label }}
+      <span v-if="props.required" class="text-red-500">*</span>
+    </label>
     <div
       @click="toggleDropdown"
       class="flex items-center justify-between w-full p-3 text-gray-500 transition duration-200 ease-in-out border border-gray-300 rounded-lg shadow-md cursor-pointer hover:bg-gray-50"

@@ -159,6 +159,7 @@
                 :multiple="field.multiple"
                 :allowCustom="field.allowCustom"
                 :placeholder="field.placeholder || field.label"
+                :label="field.label"
               />
 
               <BaseDropdown

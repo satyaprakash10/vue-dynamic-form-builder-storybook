@@ -14,6 +14,9 @@ const meta: Meta<typeof BaseDateField> = {
     futureOnly: { control: "boolean", description: "Only allow today/future" },
     clearable: { control: "boolean", description: "Show clear button" },
   },
+  args: {
+    label: "Field Title",
+  },
 };
 
 export default meta;
@@ -21,18 +24,16 @@ type Story = StoryObj<typeof BaseDateField>;
 
 export const Default: Story = {
   args: {
-    label: "Select Date",
     placeholder: "Select a date",
-    modelValue: null,
+    modelValue: "",
     clearable: true,
   },
 };
 
 export const WithMinAndMax: Story = {
   args: {
-    label: "Book a date",
     placeholder: "Between next 7 days",
-    modelValue: null,
+    modelValue: "",
     minDate: new Date(),
     maxDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
     clearable: true,
@@ -41,9 +42,8 @@ export const WithMinAndMax: Story = {
 
 export const FutureOnly: Story = {
   args: {
-    label: "Future Events",
     placeholder: "Today or later",
-    modelValue: null,
+    modelValue: "",
     futureOnly: true,
     clearable: true,
   },

@@ -32,7 +32,7 @@
             >{{ link.name }}</a
           >
           <a
-            href="/storybook"
+            :href="storybookHref"
             target="_blank"
             rel="noopener"
             class="px-3 py-1 text-white bg-indigo-600 rounded hover:bg-indigo-700"
@@ -137,7 +137,7 @@
             >{{ link.name }}</a
           >
           <a
-            href="/storybook"
+            :href="storybookHref"
             target="_blank"
             rel="noopener"
             class="block px-3 py-2 mt-1 text-white bg-indigo-600 rounded hover:bg-indigo-700"
@@ -159,7 +159,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 const links = [
   { name: "Home", href: "#" },
@@ -181,6 +181,13 @@ const profileMenu = [
 
 const profileOpen = ref(false);
 const mobileOpen = ref(false);
+
+const storybookHref = computed(() => {
+  // Allow overriding the Storybook URL via environment variable
+  // e.g., VITE_STORYBOOK_URL=https://storybook.example.com
+  const fromEnv = import.meta.env.VITE_STORYBOOK_URL as string | undefined;
+  return fromEnv && fromEnv.trim() ? fromEnv : "/storybook";
+});
 
 function toggleProfile() {
   profileOpen.value = !profileOpen.value;

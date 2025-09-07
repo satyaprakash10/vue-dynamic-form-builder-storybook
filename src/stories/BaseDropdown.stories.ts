@@ -1,5 +1,6 @@
 import BaseDropdown from "../components/base/BaseDropdown.vue";
 import { Meta, StoryObj } from "@storybook/vue3";
+import { ref } from "vue";
 
 const meta: Meta<typeof BaseDropdown> = {
   title: "Fields/BaseDropdown",
@@ -26,4 +27,12 @@ export const Default: Story = {
     ],
     placeholder: "Choose option",
   },
+  render: (args) => ({
+    components: { BaseDropdown },
+    setup() {
+      const value = ref<string>(args.modelValue as string);
+      return { args, value };
+    },
+    template: `<BaseDropdown v-bind="args" v-model="value" />`,
+  }),
 };

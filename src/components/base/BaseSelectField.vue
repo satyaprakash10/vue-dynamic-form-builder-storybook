@@ -150,7 +150,7 @@ document.addEventListener("click", handleClickOutside);
           type="text"
           v-model="search"
           :placeholder="selectedLabel || props.placeholder || 'Select...'"
-          class="w-full px-4 py-3 transition-all duration-300 ease-in-out transform border border-gray-300 rounded-lg shadow-lg cursor-pointer focus-within:ring-1 focus-within:ring-indigo-400 hover:bg-gray200"
+          class="w-full px-4 py-2 transition-all duration-300 ease-in-out transform bg-white border border-gray-300 rounded-lg shadow-lg cursor-pointer focus-within:ring-1 focus-within:ring-indigo-400 hover:bg-gray200"
           readonly
         />
         <ChevronDownIcon
@@ -158,7 +158,7 @@ document.addEventListener("click", handleClickOutside);
             'rotate-180 transition-all transform duration-500 ease-in-out':
               dropdownOpen,
           }"
-          class="absolute w-5 h-5 mt-4 text-gray-400 pointer-events-none right-3"
+          class="absolute w-5 h-5 mt-3 text-gray-400 pointer-events-none hover:text-gray-600 right-3"
         />
       </template>
     </div>

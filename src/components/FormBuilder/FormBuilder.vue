@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-4xl p-6 mx-auto space-y-6">
+  <div class="w-full max-w-4xl p-0 mx-auto space-y-6 sm:p-6">
     <h2
       class="py-4 mb-4 text-2xl font-bold text-gray-800 border-b border-slate-300 sm:mb-8"
     >
@@ -8,57 +8,77 @@
 
     <!-- Forms Toolbar -->
     <div
-      class="flex items-center gap-3 p-2 mb-6 bg-white border rounded-lg shadow-lg border-slate-300"
+      class="gap-3 p-2 bg-white border rounded-lg shadow-lg border-slate-300"
     >
-      <button
-        type="button"
-        @click="handleUndo"
-        :disabled="!canUndo"
-        class="px-3 py-1 transition bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-40"
-      >
-        Undo
-      </button>
-
-      <button
-        type="button"
-        @click="handleRedo"
-        :disabled="!canRedo"
-        class="px-3 py-1 transition bg-gray-200 rounded-lg hover:bg-gray-400 disabled:opacity-40"
-      >
-        Redo
-      </button>
-
-      <button
-        type="button"
-        @click="handleSave"
-        class="flex items-center gap-2 px-3 py-1 text-white transition bg-indigo-600 rounded cursor-pointer hover:bg-indigo-700"
-      >
-        <svg
-          v-if="formState.isSaving.value"
-          class="w-4 h-4 animate-spin"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      <div class="items-center inline-block w-full mb-6 sm:flex">
+        <div
+          class="flex justify-center w-full mt-3 space-x-5 sm:justify-center sm:mt-0"
         >
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4" />
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-          />
-        </svg>
-        <span>{{ formState.isSaving.value ? "Saving..." : "Save Draft" }}</span>
-      </button>
+          <button
+            type="button"
+            @click="handleUndo"
+            :disabled="!canUndo"
+            class="w-auto px-3 py-1 transition bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-40"
+          >
+            Undo
+          </button>
 
-      <button
-        type="button"
-        @click="discardDraft"
-        class="px-3 py-1 ml-2 text-sm text-red-600 transition rounded bg-red-50 hover:bg-red-100"
+          <button
+            type="button"
+            @click="handleRedo"
+            :disabled="!canRedo"
+            class="px-3 py-1 transition bg-gray-200 rounded-lg hover:bg-gray-400 disabled:opacity-40"
+          >
+            Redo
+          </button>
+        </div>
+
+        <div
+          class="flex justify-center w-full mt-3 space-x-5 sm:justify-start sm:mt-0"
+        >
+          <button
+            type="button"
+            @click="handleSave"
+            class="flex items-center gap-2 px-3 py-1 text-white transition bg-indigo-600 rounded cursor-pointer hover:bg-indigo-700"
+          >
+            <svg
+              v-if="formState.isSaving.value"
+              class="w-4 h-4 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            <span>{{
+              formState.isSaving.value ? "Saving..." : "Save Draft"
+            }}</span>
+          </button>
+
+          <button
+            type="button"
+            @click="discardDraft"
+            class="px-3 py-1 ml-2 text-sm text-red-600 transition rounded bg-red-50 hover:bg-red-100"
+          >
+            Discard Draft
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="p-1 mt-2 ml-auto text-xs italic text-gray-500 bg-green-100 sm:text-sm sm:mt-0"
       >
-        Discard Draft
-      </button>
-
-      <div class="ml-auto text-sm italic text-gray-500">
         <span v-if="isDirty">● Unsaved changes</span>
         <span v-else>✔ All saved</span>
         <span v-if="formState.lastSaved.value">
@@ -272,22 +292,31 @@
       <div
         v-if="showCustomFieldsVal"
         id="custom-form-section"
-        class="max-w-4xl p-6 mt-6 space-y-4 bg-white border rounded-lg shadow-lg border-slate-300"
+        class="max-w-4xl p-3 mt-6 space-y-4 bg-white border rounded-lg shadow-lg sm:p-6 border-slate-300"
       >
         <h3 class="mb-2 text-lg font-semibold text-gray-800">
           Add Custom Field
         </h3>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <input
-            v-model="newFieldLabel"
-            placeholder="Field Label"
-            class="p-3 bg-gray-100 border rounded-lg shadow-xl cursor-pointer hover:bg-gray-300 border-slate-300 focus:ring-2 focus:ring-indigo-400"
-          />
-          <input
-            v-model="newFieldName"
-            placeholder="Field Name"
-            class="p-3 bg-gray-100 border rounded-lg shadow-xl cursor-pointer hover:bg-gray-300 border-slate-300 focus:ring-2 focus:ring-indigo-400"
-          />
+          <div>
+            <label for="newFieldLabel">Field Label</label>
+            <input
+              v-model="newFieldLabel"
+              placeholder="Field Label"
+              class="w-full h-12 p-3 bg-gray-100 border rounded-lg shadow-xl cursor-pointer sm:w-auto hover:bg-gray-300 border-slate-300 focus:ring-2 focus:ring-indigo-400"
+            />
+          </div>
+
+          <div>
+            <label for="newFieldLabel">Field Name</label>
+
+            <input
+              v-model="newFieldName"
+              placeholder="Field Name"
+              class="w-full h-12 p-3 bg-gray-100 border rounded-lg shadow-xl cursor-pointer sm:w-auto hover:bg-gray-300 border-slate-300 focus:ring-2 focus:ring-indigo-400"
+            />
+          </div>
+
           <BaseDropdown
             v-model="newFieldType"
             :options="fieldTypeOptions"
@@ -322,7 +351,9 @@
     <!-- Debug FormData -->
     <div class="p-4 mt-4 bg-gray-100 border-t-1 border-slate-300">
       <h6 class="text-sm font-bold text-gray-700">Form Data</h6>
-      <pre class="p-2 mt-2 text-xs bg-white rounded-lg">{{ formData }}</pre>
+      <pre class="p-2 mt-2 overflow-x-auto text-xs bg-white rounded-lg">{{
+        formData
+      }}</pre>
     </div>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from "vue";
+import { ref, defineProps, defineEmits, onMounted, onBeforeUnmount } from "vue";
 
 const props = defineProps<{
   modelValue: string;
@@ -14,6 +14,7 @@ const emit = defineEmits<{
 }>();
 
 const open = ref(false);
+const rootEl = ref<HTMLElement | null>(null);
 
 function toggleDropdown() {
   open.value = !open.value;
@@ -23,10 +24,26 @@ function selectOption(option: { label: string; value: string }) {
   emit("update:modelValue", option.value);
   open.value = false;
 }
+
+function onDocumentClick(e: MouseEvent) {
+  const target = e.target as Node | null;
+  if (!rootEl.value || !target) return;
+  if (!rootEl.value.contains(target)) {
+    open.value = false;
+  }
+}
+
+onMounted(() => {
+  document.addEventListener("click", onDocumentClick);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", onDocumentClick);
+});
 </script>
 
 <template>
-  <div class="relative w-full dropdown-wrapper">
+  <div ref="rootEl" class="relative w-full dropdown-wrapper">
     <label
       v-if="props.label"
       class="block mb-1 text-sm font-medium text-gray-700"
@@ -36,7 +53,7 @@ function selectOption(option: { label: string; value: string }) {
     </label>
     <div
       @click="toggleDropdown"
-      class="flex items-center justify-between w-full p-3 text-gray-500 transition duration-200 ease-in-out border border-gray-300 rounded-lg shadow-md cursor-pointer hover:bg-gray-50"
+      class="flex items-center justify-between w-full p-3 text-gray-500 transition duration-200 ease-in-out bg-gray-100 border border-gray-300 rounded-lg shadow-md cursor-pointer hover:bg-gray-300"
     >
       <span>{{
         props.modelValue
@@ -62,13 +79,13 @@ function selectOption(option: { label: string; value: string }) {
     <transition name="fade">
       <div
         v-if="open"
-        class="absolute z-10 w-full mt-1 overflow-auto transition-all duration-300 ease-in-out transform bg-white border border-gray-300 rounded-lg shadow-md max-h-60"
+        class="absolute z-10 w-full p-1 mt-1 overflow-auto transition-all duration-300 ease-in-out transform bg-white border border-gray-300 shadow-2xl rounded-xl max-h-60"
       >
         <div
           v-for="opt in props.options"
           :key="opt.value"
           @click="selectOption(opt)"
-          class="p-2 text-gray-500 transition duration-150 ease-in-out cursor-pointer hover:bg-gray-200"
+          class="p-2 text-sm text-gray-500 transition duration-150 ease-in-out border-b border-gray-200 rounded-none cursor-pointer hover:rounded-lg hover:shadow-lg hover:bg-gray-200"
         >
           {{ opt.label }}
         </div>

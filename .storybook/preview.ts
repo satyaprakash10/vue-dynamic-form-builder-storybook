@@ -13,7 +13,7 @@ export const decorators = [
   (story) => ({
     components: { ToastProvider },
     template:
-      '<div class="w-full p-6"><div class="p-4 bg-gray-100 border-slate-300 border rounded-2xl h-auto"><ToastProvider /><story /></div></div>',
+      '<div class="w-full p-6"><div class="p-0 sm:p-4 bg-gray-100 border-slate-300 border rounded-2xl h-auto"><ToastProvider /><story /></div></div>',
   }),
 ] as any;
 

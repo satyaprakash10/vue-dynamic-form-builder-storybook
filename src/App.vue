@@ -106,7 +106,7 @@ function handleWizardFinish() {
     <div
       class="flex items-center justify-center min-h-screen mt-6 bg-white border shadow-2xl rounded-2xl sm:mt-10 border-slate-300"
     >
-      <div class="w-full max-w-4xl p-6 space-y-6">
+      <div class="w-full max-w-4xl p-3 space-y-6 sm:p-6">
         <h1 class="text-xl font-bold text-gray-800">Vue FormBuilder Demo</h1>
 
         <div class="flex flex-wrap gap-2">

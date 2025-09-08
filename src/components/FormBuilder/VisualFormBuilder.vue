@@ -12,6 +12,7 @@
           class="px-3 py-2 text-sm text-gray-700 transition bg-gray-100 border rounded cursor-move border-slate-300 hover:bg-gray-200"
           draggable="true"
           @dragstart="onDragStart(type)"
+          @touchend.prevent="onPaletteTouchAdd(type)"
         >
           {{ type }}
         </li>
@@ -27,6 +28,7 @@
         class="p-3 space-y-3 border-2 border-dashed rounded border-slate-300 min-h-40"
         @dragover.prevent
         @drop="onDrop"
+        ref="canvasRef"
       >
         <transition-group name="dnd" tag="div">
           <div
@@ -37,6 +39,11 @@
             @dragstart="onReorderStart(idx)"
             @dragover.prevent
             @drop="onReorderDrop(idx)"
+            :data-index="idx"
+            data-vfb-item
+            @touchstart="onFieldTouchStart(idx, $event)"
+            @touchmove.prevent="onFieldTouchMove($event)"
+            @touchend="onFieldTouchEnd"
           >
             <div class="text-sm">
               <strong class="mr-2 capitalize">{{ field.type }}</strong>
@@ -135,6 +142,8 @@ const fields = reactive<FieldDef[]>([]);
 
 const dragType = ref<string | null>(null);
 const reorderFrom = ref<number | null>(null);
+const canvasRef = ref<HTMLElement | null>(null);
+const touchReorderFrom = ref<number | null>(null);
 
 function onDragStart(type: string) {
   dragType.value = type;
@@ -176,6 +185,49 @@ function emitSchema() {
 
 function clearAll() {
   fields.splice(0, fields.length);
+  emitSchema();
+}
+
+// ---- Mobile touch support ----
+function onFieldTouchStart(index: number, _e: TouchEvent) {
+  touchReorderFrom.value = index;
+}
+
+function getIndexFromTouchEvent(e: TouchEvent): number | null {
+  const t = e.changedTouches[0] || e.touches[0];
+  if (!t) return null;
+  const el = document.elementFromPoint(
+    t.clientX,
+    t.clientY
+  ) as HTMLElement | null;
+  const itemEl = el?.closest?.("[data-vfb-item]") as HTMLElement | null;
+  if (itemEl && itemEl.dataset && typeof itemEl.dataset.index === "string") {
+    const parsed = Number(itemEl.dataset.index);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+  return null;
+}
+
+function onFieldTouchMove(_e: TouchEvent) {
+  // No-op for now; visual drag ghost not implemented for simplicity
+}
+
+function onFieldTouchEnd(e: TouchEvent) {
+  const targetIndex = getIndexFromTouchEvent(e);
+  if (targetIndex !== null && touchReorderFrom.value !== null) {
+    reorderFrom.value = touchReorderFrom.value;
+    onReorderDrop(targetIndex);
+  }
+  touchReorderFrom.value = null;
+}
+
+function onPaletteTouchAdd(type: string) {
+  fields.push({
+    id: Date.now().toString(),
+    type,
+    name: type + "_" + (fields.length + 1),
+    label: type,
+  });
   emitSchema();
 }
 </script>

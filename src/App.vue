@@ -136,10 +136,7 @@ function handleWizardFinish() {
           appear
           @after-enter="onAfterEnter"
         >
-          <div
-            class="p-4 bg-gray-200 border rounded-lg shadow-lg border-slate-300"
-            id="main-form-section"
-          >
+          <div class="" id="main-form-section">
             <FormBuilder
               :key="showCustomBuilder ? 'with-custom' : 'no-custom'"
               :schema="schema"
@@ -155,11 +152,7 @@ function handleWizardFinish() {
           appear
           @after-enter="onAfterEnter"
         >
-          <div
-            v-if="showVisual"
-            id="visual-form-section"
-            class="p-4 bg-gray-200 border rounded-lg shadow-lg border-slate-300 scroll-mt-20"
-          >
+          <div v-if="showVisual" id="visual-form-section" class="">
             <h2 class="mt-2 mb-3 text-lg font-semibold">Visual Form Builder</h2>
             <VisualFormBuilder
               @update:schema="(s:any)=>console.log('Schema', s)"

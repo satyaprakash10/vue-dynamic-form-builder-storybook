@@ -44,6 +44,7 @@
             @touchstart="onFieldTouchStart(idx, $event)"
             @touchmove.prevent="onFieldTouchMove($event)"
             @touchend="onFieldTouchEnd"
+            style="touch-action: none"
           >
             <div class="text-sm">
               <strong class="mr-2 capitalize">{{ field.type }}</strong>

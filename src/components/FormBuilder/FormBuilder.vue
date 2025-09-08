@@ -1,5 +1,7 @@
 <template>
-  <div class="w-full max-w-4xl p-0 mx-auto space-y-6 sm:p-6">
+  <div
+    class="flex flex-col w-full max-w-4xl p-3 mx-auto space-y-6 bg-gray-200 border rounded-lg shadow-lg border-slate-300 sm:p-6"
+  >
     <h2
       class="py-4 mb-4 text-2xl font-bold text-gray-800 border-b border-slate-300 sm:mb-8"
     >
@@ -77,7 +79,7 @@
       </div>
 
       <div
-        class="p-1 mt-2 ml-auto text-xs italic text-gray-500 bg-green-100 sm:text-sm sm:mt-0"
+        class="w-full p-1 mx-auto mt-2 ml-auto text-xs italic text-gray-500 bg-green-100 sm:max-w-lg sm:text-sm sm:mt-0"
       >
         <span v-if="isDirty">● Unsaved changes</span>
         <span v-else>✔ All saved</span>
@@ -87,81 +89,16 @@
       </div>
     </div>
 
-    <!-- Form (with loading overlay) -->
-    <div class="relative">
-      <div
-        :class="isLoading ? 'pointer-events-none opacity-60' : ''"
-        class="transition-opacity"
-      >
-        <form @submit.prevent="handleSubmit" class="space-y-4">
-          <!-- Default Fields -->
-          <div v-for="field in fields" :key="field.id">
-            <BaseTextField
-              v-if="['text', 'number'].includes(field.type)"
-              v-model="formData[field.name]"
-              :label="field.label"
-              :placeholder="field.placeholder"
-              :type="field.type === 'number' ? 'number' : 'text'"
-              :id="field.name"
-              :name="field.name"
-            />
-
-            <BaseSelectField
-              v-else-if="field.type === 'select'"
-              v-model="formData[field.name]"
-              :options="field.options || []"
-              :multiple="field.multiple"
-              :allowCustom="field.allowCustom"
-              :placeholder="field.placeholder || field.label"
-              :label="field.label"
-            />
-
-            <BaseCheckboxGroup
-              v-else-if="field.type === 'checkbox-group'"
-              v-model="formData[field.name]"
-              :options="field.options || []"
-              :label="field.label"
-              :min-selected="field.minSelected"
-              :max-selected="field.maxSelected"
-              :required="true"
-            />
-
-            <BaseDateField
-              v-else-if="field.type === 'date'"
-              v-model="formData[field.name]"
-              :label="field.label"
-              :placeholder="field.placeholder || field.label"
-              :min-date="coerceDate(field.minDate)"
-              :max-date="coerceDate(field.maxDate)"
-              :future-only="field.futureOnly"
-            />
-
-            <p v-if="errors[field.name]" class="mt-1 text-sm text-red-500">
-              {{ errors[field.name] }}
-            </p>
-          </div>
-
-          <!-- Custom Fields -->
-          <transition-group name="fade" tag="div" class="space-y-4">
-            <h3
-              v-if="customFields.length"
-              class="pt-4 mt-8 text-lg font-semibold text-gray-700 border-t border-slate-300"
-            >
-              Custom Fields
-            </h3>
-
-            <div
-              v-for="field in customFields"
-              :key="field.id"
-              class="p-4 border rounded-lg border-slate-300 bg-gray-50"
-            >
-              <label
-                v-if="field.label"
-                class="block mb-1 text-base font-medium text-gray-700"
-              >
-                {{ field.label }}
-              </label>
-
+    <div :class="inStorybook ? 'flex-1 overflow-auto' : ''">
+      <!-- Form (with loading overlay) -->
+      <div class="relative">
+        <div
+          :class="isLoading ? 'pointer-events-none opacity-60' : ''"
+          class="transition-opacity"
+        >
+          <form @submit.prevent="handleSubmit" class="space-y-4">
+            <!-- Default Fields -->
+            <div v-for="field in fields" :key="field.id">
               <BaseTextField
                 v-if="['text', 'number'].includes(field.type)"
                 v-model="formData[field.name]"
@@ -182,37 +119,15 @@
                 :label="field.label"
               />
 
-              <BaseDropdown
-                v-else-if="field.type === 'dropdown'"
-                v-model="formData[field.name]"
-                :options="field.options ?? []"
-                :placeholder="field.placeholder || field.label"
-                :label="field.label || 'Dropdown'"
-              />
-
               <BaseCheckboxGroup
                 v-else-if="field.type === 'checkbox-group'"
                 v-model="formData[field.name]"
                 :options="field.options || []"
                 :label="field.label"
+                :min-selected="field.minSelected"
+                :max-selected="field.maxSelected"
+                :required="true"
               />
-
-              <div v-else-if="field.type === 'radio'" class="flex gap-2 mt-1">
-                <label
-                  v-for="opt in field.options"
-                  :key="opt.value"
-                  class="flex items-center gap-1"
-                >
-                  <input
-                    type="radio"
-                    :name="field.name"
-                    :value="opt.value"
-                    v-model="formData[field.name]"
-                    class="form-radio"
-                  />
-                  {{ opt.label }}
-                </label>
-              </div>
 
               <BaseDateField
                 v-else-if="field.type === 'date'"
@@ -228,132 +143,230 @@
                 {{ errors[field.name] }}
               </p>
             </div>
-          </transition-group>
 
-          <button
-            type="submit"
-            :disabled="isSubmitting || isLoading"
-            class="flex items-center gap-2 px-4 py-2 mt-2 text-white transition bg-indigo-600 rounded-lg shadow hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            <!-- Custom Fields -->
+            <transition-group name="fade" tag="div" class="space-y-4">
+              <h3
+                v-if="customFields.length"
+                class="pt-4 mt-8 text-lg font-semibold text-gray-700 border-t border-slate-300"
+              >
+                Custom Fields
+              </h3>
+
+              <div
+                v-for="field in customFields"
+                :key="field.id"
+                class="p-4 border rounded-lg border-slate-300 bg-gray-50"
+              >
+                <div class="flex justify-between">
+                  <BaseTextField
+                    v-if="['text', 'number'].includes(field.type)"
+                    v-model="formData[field.name]"
+                    :label="field.label"
+                    :placeholder="field.placeholder"
+                    :type="field.type === 'number' ? 'number' : 'text'"
+                    :id="field.name"
+                    :name="field.name"
+                  />
+
+                  <BaseSelectField
+                    v-else-if="field.type === 'select'"
+                    v-model="formData[field.name]"
+                    :options="field.options || []"
+                    :multiple="field.multiple"
+                    :allowCustom="field.allowCustom"
+                    :placeholder="field.placeholder || field.label"
+                    :label="field.label"
+                  />
+
+                  <BaseDropdown
+                    v-else-if="field.type === 'dropdown'"
+                    v-model="formData[field.name]"
+                    :options="field.options ?? []"
+                    :placeholder="field.placeholder || field.label"
+                    :label="field.label || 'Dropdown'"
+                  />
+
+                  <BaseCheckboxGroup
+                    v-else-if="field.type === 'checkbox-group'"
+                    v-model="formData[field.name]"
+                    :options="field.options || []"
+                    :label="field.label"
+                  />
+
+                  <div
+                    v-else-if="field.type === 'radio'"
+                    class="flex gap-2 mt-1"
+                  >
+                    <label
+                      v-for="opt in field.options"
+                      :key="opt.value"
+                      class="flex items-center gap-1"
+                    >
+                      <input
+                        type="radio"
+                        :name="field.name"
+                        :value="opt.value"
+                        v-model="formData[field.name]"
+                        class="form-radio"
+                      />
+                      {{ opt.label }}
+                    </label>
+                  </div>
+
+                  <BaseDateField
+                    v-else-if="field.type === 'date'"
+                    v-model="formData[field.name]"
+                    :label="field.label"
+                    :placeholder="field.placeholder || field.label"
+                    :min-date="coerceDate(field.minDate)"
+                    :max-date="coerceDate(field.maxDate)"
+                    :future-only="field.futureOnly"
+                  />
+
+                  <!-- Remove Custom Field Button -->
+                  <button
+                    type="button"
+                    class="grid text-gray-500 transition rounded cursor-pointer w-7 h-7 hover:text-red-600 hover:bg-red-50 place-items-center"
+                    @click="removeCustomField(field.id)"
+                    aria-label="Remove field"
+                    title="Remove field"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="w-4 h-4"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M16.5 4.478V5.25h3.25a.75.75 0 1 1 0 1.5h-.806l-1.09 12.042A2.25 2.25 0 0 1 15.61 21H8.39a2.25 2.25 0 0 1-2.244-2.208L5.056 6.75H4.25a.75.75 0 0 1 0-1.5H7.5v-.772A2.728 2.728 0 0 1 10.228 2h3.544A2.728 2.728 0 0 1 16.5 4.478ZM9.75 9a.75.75 0 0 1 .75.75v7.5a.75.75 0 0 1-1.5 0v-7.5A.75.75 0 0 1 9.75 9Zm4.5 0a.75.75 0 0 1 .75.75v7.5a.75.75 0 0 1-1.5 0v-7.5A.75.75 0 0 1 14.25 9Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <p v-if="errors[field.name]" class="mt-1 text-sm text-red-500">
+                  {{ errors[field.name] }}
+                </p>
+              </div>
+            </transition-group>
+
+            <button
+              type="submit"
+              :disabled="isSubmitting || isLoading"
+              class="flex items-center gap-2 px-4 py-2 mt-2 text-white transition bg-indigo-600 rounded-lg shadow hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg
+                v-if="isSubmitting || isLoading"
+                class="w-5 h-5 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke-width="4"
+                />
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8"
+                />
+              </svg>
+              <span>{{
+                isSubmitting || isLoading ? "Submitting..." : "Submit"
+              }}</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div v-if="isLoading" class="absolute inset-0 grid place-items-center">
+          <div
+            class="flex items-center gap-2 px-3 py-2 text-sm text-white rounded bg-black/50"
           >
             <svg
-              v-if="isSubmitting || isLoading"
-              class="w-5 h-5 animate-spin"
-              fill="none"
+              class="w-4 h-4 animate-spin"
               viewBox="0 0 24 24"
+              fill="none"
               stroke="currentColor"
             >
               <circle
-                class="opacity-25"
                 cx="12"
                 cy="12"
                 r="10"
                 stroke-width="4"
+                class="opacity-25"
               />
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
+              <path d="M4 12a8 8 0 018-8" stroke-width="4" class="opacity-75" />
             </svg>
-            <span>{{
-              isSubmitting || isLoading ? "Submitting..." : "Submit"
-            }}</span>
-          </button>
-        </form>
-      </div>
-
-      <!-- Loading Overlay -->
-      <div v-if="isLoading" class="absolute inset-0 grid place-items-center">
-        <div
-          class="flex items-center gap-2 px-3 py-2 text-sm text-white rounded bg-black/50"
-        >
-          <svg
-            class="w-4 h-4 animate-spin"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-              stroke-width="4"
-              class="opacity-25"
-            />
-            <path d="M4 12a8 8 0 018-8" stroke-width="4" class="opacity-75" />
-          </svg>
-          Loading...
+            Loading...
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Add Custom Field -->
-    <transition name="fade-scale">
-      <div
-        v-if="showCustomFieldsVal"
-        id="custom-form-section"
-        class="max-w-4xl p-3 mt-6 space-y-4 bg-white border rounded-lg shadow-lg sm:p-6 border-slate-300"
-      >
-        <h3 class="mb-2 text-lg font-semibold text-gray-800">
-          Add Custom Field
-        </h3>
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div>
-            <label for="newFieldLabel">Field Label</label>
+      <!-- Add Custom Field -->
+      <transition name="fade-scale">
+        <div
+          v-if="showCustomFieldsVal"
+          id="custom-form-section"
+          class="max-w-4xl p-6 mt-6 space-y-4 bg-white border rounded-lg shadow-lg border-slate-300"
+        >
+          <h3 class="mb-2 text-lg font-semibold text-gray-800">
+            Add Custom Field
+          </h3>
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <input
               v-model="newFieldLabel"
               placeholder="Field Label"
-              class="w-full h-12 p-3 bg-gray-100 border rounded-lg shadow-xl cursor-pointer sm:w-auto hover:bg-gray-300 border-slate-300 focus:ring-2 focus:ring-indigo-400"
+              class="p-3 bg-gray-100 border rounded-lg shadow-xl cursor-pointer hover:bg-gray-300 border-slate-300 focus:ring-2 focus:ring-indigo-400"
             />
-          </div>
-
-          <div>
-            <label for="newFieldLabel">Field Name</label>
-
             <input
               v-model="newFieldName"
               placeholder="Field Name"
-              class="w-full h-12 p-3 bg-gray-100 border rounded-lg shadow-xl cursor-pointer sm:w-auto hover:bg-gray-300 border-slate-300 focus:ring-2 focus:ring-indigo-400"
+              class="p-3 bg-gray-100 border rounded-lg shadow-xl cursor-pointer hover:bg-gray-300 border-slate-300 focus:ring-2 focus:ring-indigo-400"
+            />
+            <BaseDropdown
+              v-model="newFieldType"
+              :options="fieldTypeOptions"
+              placeholder="Select Field Type"
+              label="Field Type"
+              class="w-full"
             />
           </div>
 
-          <BaseDropdown
-            v-model="newFieldType"
-            :options="fieldTypeOptions"
-            placeholder="Select Field Type"
-            label="Field Type"
-            class="w-full"
-          />
-        </div>
+          <transition name="fade">
+            <div
+              v-if="
+                ['select', 'checkbox-group', 'radio', 'dropdown'].includes(
+                  newFieldType
+                )
+              "
+              class="p-3 mt-3 space-y-2 bg-gray-200 border rounded-lg shadow-md cursor-pointer shadow-xl-slate-300"
+            >
+              <DynamicOptionsInput v-model="newFieldOptions" />
+            </div>
+          </transition>
 
-        <transition name="fade">
-          <div
-            v-if="
-              ['select', 'checkbox-group', 'radio', 'dropdown'].includes(
-                newFieldType
-              )
-            "
-            class="p-3 mt-3 space-y-2 bg-gray-200 border rounded-lg shadow-md cursor-pointer shadow-xl-slate-300"
+          <button
+            @click="addCustomField"
+            class="px-4 py-2 text-white bg-green-500 rounded-lg hover:bg-green-600"
           >
-            <DynamicOptionsInput v-model="newFieldOptions" />
-          </div>
-        </transition>
+            Add Field
+          </button>
+        </div>
+      </transition>
 
-        <button
-          @click="addCustomField"
-          class="px-4 py-2 text-white bg-green-500 rounded-lg hover:bg-green-600"
-        >
-          Add Field
-        </button>
+      <!-- Debug FormData -->
+      <div class="p-4 mt-4 bg-gray-100 border-t-1 border-slate-300">
+        <h6 class="text-sm font-bold text-gray-700">Form Data</h6>
+        <pre class="p-2 mt-2 text-xs bg-white rounded-lg">{{ formData }}</pre>
       </div>
-    </transition>
-
-    <!-- Debug FormData -->
-    <div class="p-4 mt-4 bg-gray-100 border-t-1 border-slate-300">
-      <h6 class="text-sm font-bold text-gray-700">Form Data</h6>
-      <pre class="p-2 mt-2 overflow-x-auto text-xs bg-white rounded-lg">{{
-        formData
-      }}</pre>
     </div>
   </div>
 </template>
@@ -376,6 +389,7 @@ import BaseDropdown from "../../components/base/BaseDropdown.vue";
 import { useToast } from "../../composables/toast";
 import { useFormValidation } from "../../composables/useFormValidation";
 import { useFormState } from "../../composables/useFormState";
+const inStorybook = !!(import.meta as any)?.env?.STORYBOOK;
 
 const props = defineProps<{
   title?: string;
@@ -628,6 +642,21 @@ function addCustomField() {
   newFieldOptions.value = [];
 }
 
+function removeCustomField(id: string) {
+  const idx = customFields.findIndex((f) => f.id === id);
+  if (idx === -1) return;
+  const name = customFields[idx].name;
+  customFields.splice(idx, 1);
+  // Clean up form data and errors
+  // @ts-ignore
+  errors[name] = "";
+  if (name in formData) {
+    delete formData[name];
+  }
+  formState.recordChange();
+  toast.info("Custom field removed");
+}
+
 // --- Actions ---
 function handleUndo() {
   formState.undo();
@@ -655,11 +684,17 @@ async function handleSubmit() {
     let customOk = true;
     customFields.forEach((f) => {
       const v = formData[f.name];
-      const bad = Array.isArray(v) ? v.length === 0 : !v && v !== 0;
+      const isEmptyArray = Array.isArray(v) && v.length === 0;
+      const isEmptyString = typeof v === "string" && v.trim() === "";
+      const isNullish = v === null || v === undefined;
+      const bad = isEmptyArray || isEmptyString || isNullish;
       if (bad) {
         // @ts-ignore - errors is reactive map from validation composable
         errors[f.name] = "This field is required";
         customOk = false;
+      } else {
+        // @ts-ignore
+        errors[f.name] = "";
       }
     });
     if (await validate()) {

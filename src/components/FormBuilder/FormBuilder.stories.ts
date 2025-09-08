@@ -16,7 +16,7 @@ type Story = StoryObj<typeof FormBuilder>;
 export const BasicForm: Story = {
   render: () => ({
     components: { FormBuilder },
-    template: `<FormBuilder :title="'Basic Form'" :showCustomFields="false" />`,
+    template: `<div class="w-full  h-screen overflow-hidden"><div class="h-full overflow-auto"><FormBuilder :title="'Basic Form'" :showCustomFields="false" /></div></div>`,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -30,7 +30,7 @@ export const BasicForm: Story = {
 export const ComplexForm: Story = {
   render: () => ({
     components: { FormBuilder },
-    template: `<FormBuilder :title="'Complex Form'" :showCustomFields="true" />`,
+    template: `<div class="w-full h-screen overflow-hidden"><div class="h-full overflow-auto"><FormBuilder :title="'Complex Form'" :showCustomFields="true" /></div></div>`,
   }),
 };
 
@@ -38,7 +38,7 @@ export const ComplexForm: Story = {
 export const ConditionalFields: Story = {
   render: () => ({
     components: { FormBuilder },
-    template: `<FormBuilder :title="'Conditional Form'" :showCustomFields="true" />`,
+    template: `<div class="w-full h-screen overflow-hidden"><div class="h-full overflow-auto"><FormBuilder :title="'Conditional Form'" :showCustomFields="true" /></div></div>`,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -56,7 +56,7 @@ export const ConditionalFields: Story = {
 export const ValidationErrors: Story = {
   render: () => ({
     components: { FormBuilder },
-    template: `<FormBuilder :title="'Validation Errors'" :showCustomFields="false" />`,
+    template: `<div class="w-full h-screen overflow-hidden"><div class="h-full overflow-auto"><FormBuilder :title="'Validation Errors'" :showCustomFields="false" /></div></div>`,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -74,8 +74,10 @@ export const LoadingState: Story = {
   render: () => ({
     components: { FormBuilder },
     template: `
-      <div>
-        <FormBuilder :title="'Loading State'" :loading="true" :showCustomFields="false" />
+      <div class="w-full h-screen overflow-hidden">
+        <div class="h-full overflow-auto">
+          <FormBuilder :title="'Loading State'" :loading="true" :showCustomFields="false" />
+        </div>
       </div>
     `,
   }),
@@ -85,6 +87,6 @@ export const LoadingState: Story = {
 export const Playground: Story = {
   render: () => ({
     components: { FormBuilder },
-    template: `<FormBuilder :title="'Playground'" :showCustomFields="false" />`,
+    template: `<div class="w-full h-screen overflow-hidden"><div class="h-full overflow-auto"><FormBuilder :title="'Playground'" :showCustomFields="false" /></div></div>`,
   }),
 };

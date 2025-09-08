@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from "vue";
+import { ref, defineProps, defineEmits, watch } from "vue";
 
 const props = defineProps<{
   modelValue: { label: string; value: string }[];
@@ -10,18 +10,32 @@ const emit = defineEmits<{
 }>();
 
 const newOption = ref("");
+const localOptions = ref<{ label: string; value: string }[]>([
+  ...(props.modelValue || []),
+]);
+
+watch(
+  () => props.modelValue,
+  (v) => {
+    localOptions.value = [...(v || [])];
+  },
+  { immediate: true }
+);
 
 function addOption() {
-  if (!newOption.value.trim()) return;
-  const option = { label: newOption.value, value: newOption.value };
-  emit("update:modelValue", [...props.modelValue, option]);
+  const val = newOption.value.trim();
+  if (!val) return;
+  const option = { label: val, value: val };
+  localOptions.value = [...localOptions.value, option];
+  emit("update:modelValue", [...localOptions.value]);
   newOption.value = "";
 }
 
 function removeOption(index: number) {
-  const updated = [...props.modelValue];
+  const updated = [...localOptions.value];
   updated.splice(index, 1);
-  emit("update:modelValue", updated);
+  localOptions.value = updated;
+  emit("update:modelValue", [...localOptions.value]);
 }
 </script>
 
@@ -42,10 +56,10 @@ function removeOption(index: number) {
         Add
       </button>
     </div>
-    <div v-if="props.modelValue.length > 0" class="flex flex-wrap gap-2">
+    <div v-if="localOptions.length > 0" class="flex flex-wrap gap-2">
       <span
-        v-for="(opt, i) in props.modelValue"
-        :key="i"
+        v-for="(opt, i) in localOptions"
+        :key="opt.value + '-' + i"
         class="flex items-center gap-1 px-3 py-1 text-indigo-800 transition transform bg-indigo-100 rounded-full shadow-md hover:scale-105"
       >
         {{ opt.label }}

@@ -38,7 +38,7 @@ function updateValue(e: Event) {
 </script>
 
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col w-full">
     <!-- Label -->
     <label
       v-if="label"
@@ -61,7 +61,7 @@ function updateValue(e: Event) {
         'w-full p-2 transition duration-200 ease-in-out border rounded-lg bg-white shadow-md focus:outline-none',
         disabled
           ? 'bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed opacity-60'
-          : 'border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 hover:bg-gray-50 cursor-text',
+          : 'border-gray-300 focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 hover:bg-gray-50 cursor-text',
       ]"
     />
 

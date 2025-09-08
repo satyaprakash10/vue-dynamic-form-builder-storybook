@@ -1,0 +1,18 @@
+html,
+body,
+#storybook-root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+}
+/* Ensure story canvas area fills and does not scroll the page */
+.sb-show-main {
+  height: 100%;
+  overflow: hidden;
+}
+/* Docs layout safety */
+.docs-story {
+  height: 100%;
+}

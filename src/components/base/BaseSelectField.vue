@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
-import { ChevronDownIcon } from "@heroicons/vue/24/solid";
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
+import { ChevronDownIcon, XMarkIcon } from "@heroicons/vue/24/solid";
 
 interface Option {
   label: string;
@@ -34,6 +34,7 @@ const selected = ref<any>(
 );
 const loading = ref(false);
 const dropdownOpen = ref(false);
+const rootEl = ref<HTMLElement | null>(null);
 
 // Async load
 onMounted(async () => {
@@ -92,6 +93,14 @@ function removeTag(value: string) {
   }
 }
 
+function clearSingle() {
+  if (!props.multiple) {
+    selected.value = "";
+    emit("update:modelValue", "");
+    dropdownOpen.value = false;
+  }
+}
+
 function addCustomTag() {
   const val = search.value.trim();
   if (!val) return;
@@ -104,44 +113,70 @@ function addCustomTag() {
 
 function handleClickOutside(event: MouseEvent) {
   const el = event.target as HTMLElement;
-  if (!el.closest(".selectfield-container")) dropdownOpen.value = false;
+  if (!rootEl.value) return;
+  if (!rootEl.value.contains(el)) dropdownOpen.value = false;
 }
-document.addEventListener("click", handleClickOutside);
+
+onMounted(() => document.addEventListener("click", handleClickOutside));
+onBeforeUnmount(() =>
+  document.removeEventListener("click", handleClickOutside)
+);
 </script>
 
 <template>
-  <div class="relative w-full selectfield-container">
+  <div ref="rootEl" class="relative w-full selectfield-container">
     <!-- Label -->
     <label v-if="props.label" :for="props.id" class="block mb-1 font-medium">
       {{ props.label }}
     </label>
 
     <!-- Input box -->
-    <div class="flex flex-wrap gap-1" @click="dropdownOpen = true">
+    <div
+      class="relative flex flex-wrap items-center gap-1"
+      @click="dropdownOpen = !dropdownOpen"
+    >
       <!-- Multiple selected tags -->
       <template v-if="props.multiple">
-        <span
-          v-for="val in selected"
-          :key="val"
-          class="flex items-center gap-1 px-2 py-1 text-indigo-800 bg-indigo-200 rounded-md"
+        <div
+          class="relative w-full pr-8 min-h-[42px] px-2 py-1 bg-white border border-gray-300 rounded-lg shadow-sm focus-within:ring-1 focus-within:ring-indigo-400 flex flex-wrap items-center gap-1 cursor-text"
+          @click.stop="dropdownOpen = !dropdownOpen"
         >
-          {{ internalOptions.find((o) => o.value === val)?.label || val }}
-          <button
-            type="button"
-            @click.stop="removeTag(val)"
-            class="text-sm font-bold cursor-pointer"
+          <span
+            v-for="val in selected"
+            :key="val"
+            class="inline-flex items-center max-w-full gap-1 px-2 py-1 text-sm text-indigo-800 bg-indigo-100 rounded-md"
           >
-            ×
-          </button>
-        </span>
-        <input
-          type="text"
-          v-model="search"
-          :placeholder="props.placeholder || 'Select...'"
-          class="w-full px-4 py-2 transition-all duration-300 ease-in-out transform border border-gray-300 rounded-lg cursor-pointer focus-within:ring-1 focus-within:ring-indigo-400 hover:bg-gray200"
-          @focus="dropdownOpen = true"
-          @keydown.enter.prevent="props.allowCustom ? addCustomTag() : null"
-        />
+            <span class="truncate">{{
+              internalOptions.find((o) => o.value === val)?.label || val
+            }}</span>
+            <button
+              type="button"
+              @click.stop="removeTag(val)"
+              class="text-sm font-bold cursor-pointer"
+              aria-label="Remove"
+              title="Remove"
+            >
+              ×
+            </button>
+          </span>
+          <input
+            type="text"
+            v-model="search"
+            :placeholder="
+              selected.length === 0 ? props.placeholder || 'Select...' : ''
+            "
+            class="flex-1 min-w-[80px] px-2 py-1 bg-transparent border-0 outline-none"
+            @focus="dropdownOpen = true"
+            @keydown.enter.prevent="props.allowCustom ? addCustomTag() : null"
+          />
+          <ChevronDownIcon
+            :class="{
+              'rotate-180 transition-all transform duration-500 ease-in-out':
+                dropdownOpen,
+            }"
+            class="absolute w-5 h-5 text-gray-400 -translate-y-1/2 pointer-events-none right-2 top-1/2"
+          />
+        </div>
       </template>
 
       <!-- Single select -->
@@ -153,21 +188,33 @@ document.addEventListener("click", handleClickOutside);
           class="w-full px-4 py-2 transition-all duration-300 ease-in-out transform bg-white border border-gray-300 rounded-lg shadow-lg cursor-pointer focus-within:ring-1 focus-within:ring-indigo-400 hover:bg-gray200"
           readonly
         />
-        <ChevronDownIcon
-          :class="{
-            'rotate-180 transition-all transform duration-500 ease-in-out':
-              dropdownOpen,
-          }"
-          class="absolute w-5 h-5 mt-3 text-gray-400 pointer-events-none hover:text-gray-600 right-3"
-        />
+        <div class="absolute inset-y-0 flex items-center gap-1 right-2">
+          <button
+            v-if="selected"
+            type="button"
+            @click.stop="clearSingle"
+            class="grid w-6 h-6 text-gray-400 transition rounded hover:text-gray-600 hover:bg-gray-100 place-items-center"
+            title="Clear"
+            aria-label="Clear"
+          >
+            <XMarkIcon class="w-4 h-4" />
+          </button>
+          <ChevronDownIcon
+            :class="{
+              'rotate-180 transition-all transform duration-500 ease-in-out':
+                dropdownOpen,
+            }"
+            class="w-5 h-5 text-gray-400 hover:text-gray-600"
+          />
+        </div>
       </template>
     </div>
 
     <!-- Dropdown menu -->
-    <transition name="fade" mode="out-in">
+    <transition name="menu" mode="out-in">
       <ul
         v-if="dropdownOpen"
-        class="absolute z-50 w-full px-2 py-2 mt-1 overflow-auto bg-white border border-gray-300 rounded-lg shadow-lg max-h-60"
+        class="absolute z-50 w-full px-2 py-2 mt-1 overflow-auto bg-white border border-gray-200 rounded-lg shadow-xl max-h-60"
       >
         <li v-if="loading" class="p-2 text-center text-gray-500">Loading...</li>
 
@@ -181,7 +228,7 @@ document.addEventListener("click", handleClickOutside);
           <li
             v-for="opt in filteredOptions.filter((o) => o.group === group)"
             :key="opt.value"
-            class="p-2 transition-all duration-300 ease-in-out transform rounded-lg cursor-pointer hover:rounded-lg hover:bg-gray-200"
+            class="p-2 transition-all duration-150 ease-in-out transform rounded-lg cursor-pointer hover:bg-gray-100"
             @click="selectOption(opt)"
           >
             {{ opt.label }}
@@ -192,7 +239,7 @@ document.addEventListener("click", handleClickOutside);
         <li
           v-for="opt in filteredOptions.filter((o) => !o.group)"
           :key="opt.value"
-          class="p-2 transition-all duration-300 ease-in-out transform border-b border-gray-300 cursor-pointer hover:rounded-lg hover:bg-gray-200"
+          class="p-2 transition-all duration-150 ease-in-out transform border-b border-gray-100 cursor-pointer hover:bg-gray-100"
           @click="selectOption(opt)"
         >
           {{ opt.label }}
@@ -228,13 +275,13 @@ document.addEventListener("click", handleClickOutside);
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.2s ease-in-out;
+.menu-enter-active,
+.menu-leave-active {
+  transition: all 140ms ease;
 }
-.fade-enter-from,
-.fade-leave-to {
+.menu-enter-from,
+.menu-leave-to {
   opacity: 0;
-  transform: translateY(-5px);
+  transform: translateY(-4px) scale(0.98);
 }
 </style>
